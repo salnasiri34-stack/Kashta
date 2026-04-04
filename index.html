@@ -3,129 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مزهب البر | سلومي</title>
+    <title>كشتنا | دليل الرحلات</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    
     <style>
-        :root { --main: #5d4037; --accent: #8d6e63; --bg: #f4e1c1; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; color: #333; }
-        header { background: var(--main); color: white; padding: 20px; text-align: center; font-size: 22px; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-        
+        :root { --main: #2c3e50; --accent: #e67e22; --bg: #f4f7f6; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; padding-bottom: 50px; }
+        header { background: var(--main); color: white; padding: 25px 15px; text-align: center; border-radius: 0 0 25px 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .offline-tag { background: #c0392b; color: white; padding: 5px; font-size: 12px; display: none; text-align: center; position: sticky; top: 0; z-index: 9999; }
         .container { padding: 15px; max-width: 600px; margin: auto; }
-        .card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        h2 { color: var(--main); margin-top: 0; font-size: 20px; border-bottom: 2px solid var(--bg); padding-bottom: 10px; margin-bottom: 15px; }
         
-        h3 { color: var(--main); margin-top: 0; border-bottom: 2px solid var(--bg); padding-bottom: 5px; display: flex; align-items: center; gap: 10px; }
-        
-        /* قائمة العزبة */
-        .check-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; font-size: 18px; }
-        input[type="checkbox"] { width: 22px; height: 22px; margin-left: 15px; cursor: pointer; accent-color: var(--accent); }
+        /* القائمة */
+        .list-container { display: grid; grid-template-columns: 1fr; gap: 8px; }
+        .item { display: flex; align-items: center; padding: 12px 15px; background: #fff; border-radius: 12px; border: 1px solid #f0f0f0; transition: 0.2s; }
+        input[type="checkbox"] { width: 20px; height: 20px; margin-left: 12px; accent-color: var(--accent); cursor: pointer; }
+        label { cursor: pointer; font-size: 16px; flex: 1; }
 
         /* الخريطة */
-        #map { height: 350px; width: 100%; border-radius: 15px; margin: 15px 0; border: 2px solid var(--accent); z-index: 1; }
-        
-        .btn { background: var(--accent); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; margin-bottom: 10px; transition: 0.3s; box-shadow: 0 4px 0 #5d4037; }
-        .btn:active { transform: translateY(3px); box-shadow: none; }
-        .btn-stop { background: #c62828; box-shadow: 0 4px 0 #8e1b1b; }
+        #map { height: 450px; width: 100%; border-radius: 15px; margin: 15px 0; border: 2px solid #ddd; background: #222; }
+        .btn { background: var(--accent); color: white; border: none; padding: 16px; width: 100%; border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 0 #d35400; margin-bottom: 10px; }
+        .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #d35400; }
+        .btn-stop { background: #e74c3c; box-shadow: 0 4px 0 #c0392b; }
+        .btn-clear { background: #7f8c8d; box-shadow: 0 4px 0 #636e72; font-size: 14px; padding: 10px; }
 
-        #status { text-align: center; font-weight: bold; color: var(--main); margin-top: 10px; background: #eee; padding: 8px; border-radius: 8px; }
+        #status { text-align: center; font-weight: bold; color: var(--main); margin-top: 10px; font-size: 14px; }
+        footer { text-align: center; padding: 20px; color: #7f8c8d; font-size: 14px; }
     </style>
 </head>
 <body>
 
-<header>⛺ مزهب البر - خويك في الكشتة</header>
+<div id="offline-msg" class="offline-tag">أنت الآن تعمل بدون إنترنت - وضع البر 🏜️</div>
+
+<header>
+    <h1>🏕️ كشتنا</h1>
+    <p>منصة تنظيم الرحلات البرية وتتبع المسارات</p>
+</header>
 
 <div class="container">
-
     <div class="card">
-        <h3>📋 تجهيز العزبة</h3>
-        <div class="check-item"><input type="checkbox"> الخيمة والفرش</div>
-        <div class="check-item"><input type="checkbox"> معاميل القهوة والشاهي</div>
-        <div class="check-item"><input type="checkbox"> الحطب والدافور</div>
-        <div class="check-item"><input type="checkbox"> عزبة الطبخ والذبايح</div>
-        <div class="check-item"><input type="checkbox"> منفاخ الهواء والاشتراك</div>
+        <h2>📋 مستلزمات الرحلة</h2>
+        <div class="list-container" id="checklist">
+            <div class="item"><input type="checkbox" id="item_1" onchange="saveData()"><label for="item_1">الحطب والمنقل والشاخوف</label></div>
+            <div class="item"><input type="checkbox" id="item_2" onchange="saveData()"><label for="item_2">الولاعة وكرتون الموية</label></div>
+            <div class="item"><input type="checkbox" id="item_3" onchange="saveData()"><label for="item_3">موية غسيل وصابون</label></div>
+            <div class="item"><input type="checkbox" id="item_4" onchange="saveData()"><label for="item_4">الفرش والقعدة واللمبات</label></div>
+            <div class="item"><input type="checkbox" id="item_5" onchange="saveData()"><label for="item_5">شاحن متنقل وأسلاك شحن</label></div>
+        </div>
     </div>
 
     <div class="card">
-        <h3>📍 تتبع المسار (GPS)</h3>
-        <p style="font-size: 14px; color: #666;">شغل التتبع وأنت تمشي بالسيارة عشان ترسم طريقك وما تضيع.</p>
+        <h2>🛰️ رادار القمر الصناعي</h2>
         <div id="map"></div>
-        <button id="startBtn" class="btn" onclick="startTracking()">🚀 ابدأ تسجيل المسار</button>
-        <button class="btn" style="background:#777; box-shadow: 0 4px 0 #444;" onclick="clearPath()">🗑️ مسح المسار</button>
-        <div id="status">جاهز للتحرك.. 🗺️</div>
+        <button id="trackBtn" class="btn" onclick="toggleTracking()">🚀 بدء تسجيل المسار</button>
+        <button class="btn btn-clear" onclick="resetApp()">🗑️ مسح الذاكرة والمسار</button>
+        <div id="status">جاهز ومحفوظ تلقائياً ✅</div>
     </div>
 
-    <div class="card" style="background: #fff3e0; border: 1px dashed #ff9800;">
-        <h3>🌤️ نصيحة الجو</h3>
-        <p id="weatherAdvice" style="font-weight: bold; color: #e65100;">جاري فحص التوقيت...</p>
-    </div>
-
+    <footer>جميع الحقوق محفوظة © 2026</footer>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // إعداد الخريطة على إحداثيات المدينة المنورة كمثال
-    var map = L.map('map').setView([24.4673, 39.6111], 12);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap'
-    }).addTo(map);
-    
-    var pathLine = L.polyline([], {color: '#c62828', weight: 6, opacity: 0.9}).addTo(map);
-    var marker;
-    var watchID;
+    // تسجيل الخدمة للعمل بدون نت
+    if ('serviceWorker' in navigator) {
+        const swCode = `
+            self.addEventListener('install', e => e.waitUntil(caches.open('k-v1').then(c => c.addAll(['/', '/index.html']))));
+            self.addEventListener('fetch', e => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request))));
+        `;
+        const b = new Blob([swCode], {type: 'application/javascript'});
+        navigator.serviceWorker.register(URL.createObjectURL(b));
+    }
 
-    function startTracking() {
-        if (!navigator.geolocation) {
-            alert("جوالك ما يدعم الـ GPS");
-            return;
+    // تنبيه الأوفلاين
+    window.addEventListener('offline', () => document.getElementById('offline-msg').style.display = 'block');
+    window.addEventListener('online', () => document.getElementById('offline-msg').style.display = 'none');
+
+    // إعداد الخريطة (قمر صناعي)
+    var map = L.map('map').setView([24.7136, 46.6753], 6); 
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
+
+    var path = L.polyline([], {color: '#f1c40f', weight: 6, opacity: 0.9}).addTo(map);
+    var marker, watchID;
+
+    // استرجاع البيانات عند الفتح
+    window.onload = function() {
+        const savedPath = JSON.parse(localStorage.getItem('k_path') || '[]');
+        if(savedPath.length > 0) {
+            path.setLatLngs(savedPath);
+            map.fitBounds(path.getBounds());
+            marker = L.marker(savedPath[savedPath.length-1]).addTo(map);
         }
+        const checks = JSON.parse(localStorage.getItem('k_check') || '{}');
+        Object.keys(checks).forEach(id => { if(document.getElementById(id)) document.getElementById(id).checked = checks[id]; });
+    };
 
-        const btn = document.getElementById('startBtn');
-        
-        if (btn.innerText === "🚀 ابدأ تسجيل المسار") {
+    function saveData() {
+        const checks = {};
+        document.querySelectorAll('#checklist input').forEach(i => checks[i.id] = i.checked);
+        localStorage.setItem('k_check', JSON.stringify(checks));
+    }
+
+    function toggleTracking() {
+        const btn = document.getElementById('trackBtn');
+        const status = document.getElementById('status');
+
+        if (btn.innerText.includes("بدء")) {
             btn.innerText = "🛑 إيقاف التسجيل";
             btn.classList.add('btn-stop');
-            document.getElementById('status').innerText = "جاري تتبع حركتك الآن... 🛰️";
-
             watchID = navigator.geolocation.watchPosition(function(pos) {
-                var lat = pos.coords.latitude;
-                var lng = pos.coords.longitude;
-                var currentPos = [lat, lng];
-
-                pathLine.addLatLng(currentPos);
-                map.setView(currentPos, 16);
-
+                var p = [pos.coords.latitude, pos.coords.longitude];
+                path.addLatLng(p);
+                localStorage.setItem('k_path', JSON.stringify(path.getLatLngs()));
+                map.setView(p, 17);
                 if (marker) map.removeLayer(marker);
-                marker = L.marker(currentPos).addTo(map).bindPopup("موقعك الحالي").openPopup();
-                
-                document.getElementById('status').innerText = "تم تحديث موقعك.. المسار يُحفظ ✅";
-            }, function(err) {
-                alert("تأكد من تشغيل الـ GPS في الجوال وإعطاء المتصفح إذن الوصول");
-            }, { enableHighAccuracy: true });
+                marker = L.marker(p).addTo(map);
+                status.innerText = "يتم الحفظ الآن.. 🛰️";
+            }, null, { enableHighAccuracy: true });
         } else {
-            // إيقاف التتبع
             navigator.geolocation.clearWatch(watchID);
-            btn.innerText = "🚀 ابدأ تسجيل المسار";
+            btn.innerText = "🚀 بدء تسجيل المسار";
             btn.classList.remove('btn-stop');
-            document.getElementById('status').innerText = "تم إيقاف التسجيل. المسار محفوظ على الخريطة.";
+            status.innerText = "تم حفظ المسار بنجاح.";
         }
     }
 
-    function clearPath() {
-        if(confirm("هل أنت متأكد من مسح المسار المرسوم؟")) {
-            pathLine.setLatLngs([]);
-            if (marker) map.removeLayer(marker);
-            document.getElementById('status').innerText = "تم مسح المسار.";
+    function resetApp() {
+        if(confirm("هل تريد مسح كل البيانات المحفوظة لبدء رحلة جديدة؟")) {
+            localStorage.clear();
+            location.reload();
         }
-    }
-
-    // نصيحة بسيطة بناءً على وقت اليوم
-    window.onload = function() {
-        var hours = new Date().getHours();
-        var advice = "";
-        if (hours >= 17 || hours <= 5) advice = "الجو بيبرد في البر، تأكد من ملابس الشتاء وحطب السمر!";
-        else advice = "الشمس قوية، لا تنسى المظلة وشرب الكثير من الماء!";
-        document.getElementById('weatherAdvice').innerText = advice;
     }
 </script>
-
 </body>
 </html>
