@@ -4,42 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>كشتنا | دليل الرحلات</title>
-    
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-    
     <style>
         :root { --main: #2c3e50; --accent: #e67e22; --bg: #f4f7f6; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; padding-bottom: 50px; }
-        header { background: var(--main); color: white; padding: 25px 15px; text-align: center; border-radius: 0 0 25px 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .offline-tag { background: #c0392b; color: white; padding: 5px; font-size: 12px; display: none; text-align: center; position: sticky; top: 0; z-index: 9999; }
+        header { background: var(--main); color: white; padding: 25px 15px; text-align: center; border-radius: 0 0 25px 25px; }
         .container { padding: 15px; max-width: 600px; margin: auto; }
-        .card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eee; }
-        h2 { color: var(--main); margin-top: 0; font-size: 20px; border-bottom: 2px solid var(--bg); padding-bottom: 10px; margin-bottom: 15px; }
-        
-        /* القائمة */
-        .list-container { display: grid; grid-template-columns: 1fr; gap: 8px; }
-        .item { display: flex; align-items: center; padding: 12px 15px; background: #fff; border-radius: 12px; border: 1px solid #f0f0f0; transition: 0.2s; }
-        input[type="checkbox"] { width: 20px; height: 20px; margin-left: 12px; accent-color: var(--accent); cursor: pointer; }
-        label { cursor: pointer; font-size: 16px; flex: 1; }
-
-        /* الخريطة */
-        #map { height: 450px; width: 100%; border-radius: 15px; margin: 15px 0; border: 2px solid #ddd; background: #222; }
-        .btn { background: var(--accent); color: white; border: none; padding: 16px; width: 100%; border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 0 #d35400; margin-bottom: 10px; }
-        .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #d35400; }
+        .card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h2 { color: var(--main); margin-top: 0; font-size: 20px; }
+        .item { display: flex; align-items: center; padding: 12px; border-bottom: 1px solid #eee; }
+        input[type="checkbox"] { width: 20px; height: 20px; margin-left: 12px; accent-color: var(--accent); }
+        #map { height: 400px; width: 100%; border-radius: 15px; margin: 15px 0; border: 2px solid #ddd; }
+        .btn { background: var(--accent); color: white; border: none; padding: 16px; width: 100%; border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 #d35400; }
         .btn-stop { background: #e74c3c; box-shadow: 0 4px 0 #c0392b; }
-        .btn-clear { background: #7f8c8d; box-shadow: 0 4px 0 #636e72; font-size: 14px; padding: 10px; }
-
-        #status { text-align: center; font-weight: bold; color: var(--main); margin-top: 10px; font-size: 14px; }
         footer { text-align: center; padding: 20px; color: #7f8c8d; font-size: 14px; }
     </style>
 </head>
 <body>
-
-<div id="offline-msg" class="offline-tag">أنت الآن تعمل بدون إنترنت - وضع البر 🏜️</div>
 
 <header>
     <h1>🏕️ كشتنا</h1>
@@ -49,12 +31,11 @@
 <div class="container">
     <div class="card">
         <h2>📋 مستلزمات الرحلة</h2>
-        <div class="list-container" id="checklist">
-            <div class="item"><input type="checkbox" id="item_1" onchange="saveData()"><label for="item_1">الحطب والمنقل والشاخوف</label></div>
-            <div class="item"><input type="checkbox" id="item_2" onchange="saveData()"><label for="item_2">الولاعة وكرتون الموية</label></div>
-            <div class="item"><input type="checkbox" id="item_3" onchange="saveData()"><label for="item_3">موية غسيل وصابون</label></div>
-            <div class="item"><input type="checkbox" id="item_4" onchange="saveData()"><label for="item_4">الفرش والقعدة واللمبات</label></div>
-            <div class="item"><input type="checkbox" id="item_5" onchange="saveData()"><label for="item_5">شاحن متنقل وأسلاك شحن</label></div>
+        <div id="checklist">
+            <div class="item"><input type="checkbox" id="c1" onchange="save()"><label for="c1">الحطب والمنقل والشاخوف</label></div>
+            <div class="item"><input type="checkbox" id="c2" onchange="save()"><label for="c2">الموية وصابون الغسيل</label></div>
+            <div class="item"><input type="checkbox" id="c3" onchange="save()"><label for="c3">الفرش والقعدة واللمبات</label></div>
+            <div class="item"><input type="checkbox" id="c4" onchange="save()"><label for="c4">شاحن متنقل وأسلاك الشحن</label></div>
         </div>
     </div>
 
@@ -62,8 +43,7 @@
         <h2>🛰️ رادار القمر الصناعي</h2>
         <div id="map"></div>
         <button id="trackBtn" class="btn" onclick="toggleTracking()">🚀 بدء تسجيل المسار</button>
-        <button class="btn btn-clear" onclick="resetApp()">🗑️ مسح الذاكرة والمسار</button>
-        <div id="status">جاهز ومحفوظ تلقائياً ✅</div>
+        <p id="status" style="text-align:center; font-size:14px; margin-top:10px;">جاهز للتتبع.. ✅</p>
     </div>
 
     <footer>جميع الحقوق محفوظة © 2026</footer>
@@ -71,28 +51,12 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // تسجيل الخدمة للعمل بدون نت
-    if ('serviceWorker' in navigator) {
-        const swCode = `
-            self.addEventListener('install', e => e.waitUntil(caches.open('k-v1').then(c => c.addAll(['/', '/index.html']))));
-            self.addEventListener('fetch', e => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request))));
-        `;
-        const b = new Blob([swCode], {type: 'application/javascript'});
-        navigator.serviceWorker.register(URL.createObjectURL(b));
-    }
-
-    // تنبيه الأوفلاين
-    window.addEventListener('offline', () => document.getElementById('offline-msg').style.display = 'block');
-    window.addEventListener('online', () => document.getElementById('offline-msg').style.display = 'none');
-
-    // إعداد الخريطة (قمر صناعي)
-    var map = L.map('map').setView([24.7136, 46.6753], 6); 
+    var map = L.map('map').setView([24.7136, 46.6753], 6);
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
 
-    var path = L.polyline([], {color: '#f1c40f', weight: 6, opacity: 0.9}).addTo(map);
+    var path = L.polyline([], {color: '#f1c40f', weight: 6}).addTo(map);
     var marker, watchID;
 
-    // استرجاع البيانات عند الفتح
     window.onload = function() {
         const savedPath = JSON.parse(localStorage.getItem('k_path') || '[]');
         if(savedPath.length > 0) {
@@ -104,40 +68,29 @@
         Object.keys(checks).forEach(id => { if(document.getElementById(id)) document.getElementById(id).checked = checks[id]; });
     };
 
-    function saveData() {
+    function save() {
         const checks = {};
-        document.querySelectorAll('#checklist input').forEach(i => checks[i.id] = i.checked);
+        document.querySelectorAll('input[type="checkbox"]').forEach(i => checks[i.id] = i.checked);
         localStorage.setItem('k_check', JSON.stringify(checks));
     }
 
     function toggleTracking() {
         const btn = document.getElementById('trackBtn');
-        const status = document.getElementById('status');
-
         if (btn.innerText.includes("بدء")) {
             btn.innerText = "🛑 إيقاف التسجيل";
             btn.classList.add('btn-stop');
-            watchID = navigator.geolocation.watchPosition(function(pos) {
-                var p = [pos.coords.latitude, pos.coords.longitude];
+            watchID = navigator.geolocation.watchPosition(pos => {
+                const p = [pos.coords.latitude, pos.coords.longitude];
                 path.addLatLng(p);
                 localStorage.setItem('k_path', JSON.stringify(path.getLatLngs()));
                 map.setView(p, 17);
-                if (marker) map.removeLayer(marker);
+                if(marker) map.removeLayer(marker);
                 marker = L.marker(p).addTo(map);
-                status.innerText = "يتم الحفظ الآن.. 🛰️";
-            }, null, { enableHighAccuracy: true });
+            }, null, {enableHighAccuracy: true});
         } else {
             navigator.geolocation.clearWatch(watchID);
             btn.innerText = "🚀 بدء تسجيل المسار";
             btn.classList.remove('btn-stop');
-            status.innerText = "تم حفظ المسار بنجاح.";
-        }
-    }
-
-    function resetApp() {
-        if(confirm("هل تريد مسح كل البيانات المحفوظة لبدء رحلة جديدة؟")) {
-            localStorage.clear();
-            location.reload();
         }
     }
 </script>
