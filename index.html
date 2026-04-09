@@ -3,96 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>كشتنا | دليل الرحلات</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <title>كشتتنا - لدليل الرحلات</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="كشتتنا">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/854/854850.png">
+    
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --main: #2c3e50; --accent: #e67e22; --bg: #f4f7f6; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; padding-bottom: 50px; }
-        header { background: var(--main); color: white; padding: 25px 15px; text-align: center; border-radius: 0 0 25px 25px; }
-        .container { padding: 15px; max-width: 600px; margin: auto; }
-        .card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        h2 { color: var(--main); margin-top: 0; font-size: 20px; }
-        .item { display: flex; align-items: center; padding: 12px; border-bottom: 1px solid #eee; }
-        input[type="checkbox"] { width: 20px; height: 20px; margin-left: 12px; accent-color: var(--accent); }
-        #map { height: 400px; width: 100%; border-radius: 15px; margin: 15px 0; border: 2px solid #ddd; }
-        .btn { background: var(--accent); color: white; border: none; padding: 16px; width: 100%; border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 #d35400; }
-        .btn-stop { background: #e74c3c; box-shadow: 0 4px 0 #c0392b; }
-        footer { text-align: center; padding: 20px; color: #7f8c8d; font-size: 14px; }
+        :root { --sand: #f4a460; --dark-green: #2d5a27; --wood: #8b4513; }
+        body { font-family: 'Cairo', sans-serif; background-color: #fdf5e6; color: #333; margin: 0; padding: 20px; -webkit-tap-highlight-color: transparent; }
+        
+        header { text-align: center; background: var(--dark-green); color: white; padding: 25px 10px; border-radius: 20px; border-bottom: 5px solid var(--wood); margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        
+        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
+        
+        label { display: block; margin-top: 15px; font-weight: bold; color: var(--wood); font-size: 14px; }
+        input, select { width: 100%; padding: 12px; margin-top: 8px; border: 2px solid #eee; border-radius: 12px; box-sizing: border-box; font-family: 'Cairo'; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--sand); }
+        
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 25px; }
+        button { padding: 14px; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; transition: 0.3s; font-size: 15px; }
+        
+        .btn-save { background: var(--dark-green); color: white; grid-column: span 2; box-shadow: 0 4px 0 #1e3d1a; }
+        .btn-save:active { transform: translateY(3px); box-shadow: none; }
+        
+        .btn-view { background: var(--sand); color: white; }
+        .btn-reset { background: #e74c3c; color: white; }
+        
+        #saved-list { margin-top: 20px; background: #fff; border-radius: 15px; padding: 15px; display: none; border: 1px solid #eee; animation: slideDown 0.4s ease; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .trip-item { background: #fcfcfc; padding: 15px; border-bottom: 2px solid #f5f5f5; margin-bottom: 10px; border-radius: 10px; position: relative; }
+        .delete-trip { position: absolute; left: 10px; top: 10px; color: #e74c3c; cursor: pointer; font-size: 12px; }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>🏕️ كشتنا</h1>
-    <p>منصة تنظيم الرحلات البرية وتتبع المسارات</p>
+    <h1 style="margin:0; font-size: 24px;">🏕️ كشتتنا - لدليل الرحلات</h1>
+    <p style="margin: 5px 0 0; font-size: 14px; opacity: 0.9;">مرحباً بك يا سلومي في تطبيقك الخاص</p>
 </header>
 
-<div class="container">
-    <div class="card">
-        <h2>📋 مستلزمات الرحلة</h2>
-        <div id="checklist">
-            <div class="item"><input type="checkbox" id="c1" onchange="save()"><label for="c1">الحطب والمنقل والشاخوف</label></div>
-            <div class="item"><input type="checkbox" id="c2" onchange="save()"><label for="c2">الموية وصابون الغسيل</label></div>
-            <div class="item"><input type="checkbox" id="c3" onchange="save()"><label for="c3">الفرش والقعدة واللمبات</label></div>
-            <div class="item"><input type="checkbox" id="c4" onchange="save()"><label for="c4">شاحن متنقل وأسلاك الشحن</label></div>
-        </div>
+<div class="card">
+    <label>📍 اسم الوجهة:</label>
+    <input type="text" id="destination" placeholder="مثلاً: فياض الصمان">
+
+    <label>🌐 الإحداثيات (يمكنك نسخها من ماب):</label>
+    <input type="text" id="coords" placeholder="24.7136, 46.6753">
+
+    <label>📅 تاريخ الرحلة:</label>
+    <input type="date" id="trip-date">
+
+    <label>🚗 السيارة المستخدمة:</label>
+    <select id="car-type">
+        <option>لاندكروزر 2025</option>
+        <option>سييرا</option>
+        <option>مازدا CX-9</option>
+        <option>باترول</option>
+    </select>
+
+    <div class="btn-group">
+        <button class="btn-save" onclick="saveTrip()">حفظ الرحلة الآن 💾</button>
+        <button class="btn-view" onclick="toggleSaved()">عرض رحلاتي 📂</button>
+        <button class="btn-reset" onclick="resetForm()">تصفير الخانات 🔄</button>
     </div>
 
-    <div class="card">
-        <h2>🛰️ رادار القمر الصناعي</h2>
-        <div id="map"></div>
-        <button id="trackBtn" class="btn" onclick="toggleTracking()">🚀 بدء تسجيل المسار</button>
-        <p id="status" style="text-align:center; font-size:14px; margin-top:10px;">جاهز للتتبع.. ✅</p>
+    <div id="saved-list">
+        <h4 style="margin-top:0; color: var(--dark-green);">📋 رحلاتك السابقة:</h4>
+        <div id="items-container"></div>
     </div>
-
-    <footer>جميع الحقوق محفوظة © 2026</footer>
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    var map = L.map('map').setView([24.7136, 46.6753], 6);
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
+    function saveTrip() {
+        const dest = document.getElementById('destination').value;
+        const coords = document.getElementById('coords').value;
+        const date = document.getElementById('trip-date').value;
+        const car = document.getElementById('car-type').value;
 
-    var path = L.polyline([], {color: '#f1c40f', weight: 6}).addTo(map);
-    var marker, watchID;
-
-    window.onload = function() {
-        const savedPath = JSON.parse(localStorage.getItem('k_path') || '[]');
-        if(savedPath.length > 0) {
-            path.setLatLngs(savedPath);
-            map.fitBounds(path.getBounds());
-            marker = L.marker(savedPath[savedPath.length-1]).addTo(map);
+        if(!dest || !coords) {
+            alert("سلومي، لا تنسَ تعبئة الوجهة والإحداثيات!");
+            return;
         }
-        const checks = JSON.parse(localStorage.getItem('k_check') || '{}');
-        Object.keys(checks).forEach(id => { if(document.getElementById(id)) document.getElementById(id).checked = checks[id]; });
-    };
 
-    function save() {
-        const checks = {};
-        document.querySelectorAll('input[type="checkbox"]').forEach(i => checks[i.id] = i.checked);
-        localStorage.setItem('k_check', JSON.stringify(checks));
+        const trip = { dest, coords, date, car, id: Date.now() };
+        let trips = JSON.parse(localStorage.getItem('kashtatna_trips') || '[]');
+        trips.push(trip);
+        localStorage.setItem('kashtatna_trips', JSON.stringify(trips));
+
+        alert("تمت الإضافة لدليل الرحلات! 🏕️");
+        resetForm();
+        renderTrips();
     }
 
-    function toggleTracking() {
-        const btn = document.getElementById('trackBtn');
-        if (btn.innerText.includes("بدء")) {
-            btn.innerText = "🛑 إيقاف التسجيل";
-            btn.classList.add('btn-stop');
-            watchID = navigator.geolocation.watchPosition(pos => {
-                const p = [pos.coords.latitude, pos.coords.longitude];
-                path.addLatLng(p);
-                localStorage.setItem('k_path', JSON.stringify(path.getLatLngs()));
-                map.setView(p, 17);
-                if(marker) map.removeLayer(marker);
-                marker = L.marker(p).addTo(map);
-            }, null, {enableHighAccuracy: true});
-        } else {
-            navigator.geolocation.clearWatch(watchID);
-            btn.innerText = "🚀 بدء تسجيل المسار";
-            btn.classList.remove('btn-stop');
-        }
+    function renderTrips() {
+        const container = document.getElementById('items-container');
+        const trips = JSON.parse(localStorage.getItem('kashtatna_trips') || '[]');
+        container.innerHTML = trips.length === 0 ? "<p style='font-size:13px; color:#999;'>لا يوجد رحلات حالياً.</p>" : "";
+        
+        trips.forEach((t) => {
+            container.innerHTML += `
+                <div class="trip-item">
+                    <span class="delete-trip" onclick="deleteTrip(${t.id})">حذف 🗑️</span>
+                    <strong style="color:var(--wood)">${t.dest}</strong><br>
+                    <span style="font-size:12px">📍 ${t.coords}</span><br>
+                    <span style="font-size:11px; color:#666;">📅 ${t.date || 'غير محدد'} | 🚗 ${t.car}</span>
+                </div>
+            `;
+        });
+    }
+
+    function deleteTrip(id) {
+        let trips = JSON.parse(localStorage.getItem('kashtatna_trips') || '[]');
+        trips = trips.filter(t => t.id !== id);
+        localStorage.setItem('kashtatna_trips', JSON.stringify(trips));
+        renderTrips();
+    }
+
+    function toggleSaved() {
+        const list = document.getElementById('saved-list');
+        list.style.display = list.style.display === 'none' ? 'block' : 'none';
+        renderTrips();
+    }
+
+    function resetForm() {
+        document.getElementById('destination').value = "";
+        document.getElementById('coords').value = "";
+        document.getElementById('trip-date').value = "";
     }
 </script>
+
 </body>
 </html>
