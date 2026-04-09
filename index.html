@@ -2,64 +2,75 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>كشتتنا - لدليل الرحلات</title>
     
+    <link rel="apple-touch-icon" href="https://i.ibb.co/m5Z4rN0/icon.png">
+    <link rel="icon" href="https://i.ibb.co/m5Z4rN0/icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="كشتتنا">
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --primary-green: #2d5a27; --orange-btn: #f39c12; --red-btn: #e74c3c; }
+        :root { --primary-green: #2d5a27; --orange-btn: #f39c12; --red-btn: #e74c3c; --blue-track: #3498db; }
         body { font-family: 'Cairo', sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
 
-        header { width: 100%; background: var(--primary-green); color: white; padding: 35px 0; text-align: center; border-bottom: 5px solid #1a3a16; }
-        header h1 { margin: 0; font-size: 30px; font-weight: 900; }
+        header { width: 100%; background: var(--primary-green); color: white; padding: 40px 0; text-align: center; border-bottom: 5px solid #1a3a16; }
+        header h1 { margin: 0; font-size: 32px; font-weight: 900; }
+        header p { margin: 10px 0 0; font-size: 15px; opacity: 0.9; }
 
-        .container { width: 95%; max-width: 600px; margin: -25px auto 20px auto; z-index: 10; position: relative; }
-        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid #ddd; }
+        .container { width: 92%; max-width: 550px; margin: -30px auto 20px auto; position: relative; z-index: 10; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 1px solid #ddd; }
 
-        #map { height: 250px; width: 100%; border-radius: 10px; margin-bottom: 15px; border: 1px solid #ccc; z-index: 1; }
+        #map { height: 300px; width: 100%; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ccc; background: #eee; }
 
-        .input-group { margin-bottom: 15px; text-align: right; }
-        label { display: block; margin-bottom: 5px; font-weight: 700; color: #333; }
+        .input-group { margin-bottom: 18px; text-align: right; }
+        label { display: block; margin-bottom: 6px; font-weight: 700; color: #333; font-size: 14px; }
+        input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-family: 'Cairo'; font-size: 16px; background: #fafafa; }
+
+        .btn-stack { display: flex; flex-direction: column; gap: 10px; }
+        button { padding: 15px; border: none; border-radius: 10px; cursor: pointer; font-weight: 900; font-family: 'Cairo'; font-size: 17px; color: white; transition: 0.2s; }
         
-        input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-family: 'Cairo'; font-size: 16px; background: #fff; }
+        .btn-track { background: var(--blue-track); box-shadow: 0 4px 0 #2980b9; }
+        .btn-track.active { background: var(--red-btn); box-shadow: 0 4px 0 #c0392b; animation: pulse 1.5s infinite; }
 
-        .btn-stack { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
-        button { padding: 15px; border: none; border-radius: 10px; cursor: pointer; font-weight: 900; font-family: 'Cairo'; font-size: 17px; color: white; transition: 0.3s; }
-        
-        .btn-save { background: #1a3a16; }
-        .btn-view { background: #f0ad4e; }
-        .btn-reset { background: #d9534f; }
+        .btn-save { background: #1a3a16; } 
+        .btn-view { background: #f0ad4e; } 
+        .btn-reset { background: #d9534f; } 
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
 
         #saved-list { margin-top: 25px; display: none; }
-        .trip-card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; border-right: 8px solid var(--orange-btn); position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .delete-btn { position: absolute; left: 10px; top: 10px; color: red; font-size: 12px; cursor: pointer; }
+        .trip-card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; border-right: 8px solid var(--orange-btn); position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .delete-btn { position: absolute; left: 10px; top: 10px; color: #d9534f; font-size: 11px; cursor: pointer; font-weight: bold; }
 
-        footer { background: #000; color: #fff; text-align: center; padding: 20px 0; margin-top: 40px; font-size: 13px; border-top: 3px solid var(--orange-btn); }
-        footer b { color: var(--orange-btn); }
+        footer { width: 100%; background: #000; color: #fff; text-align: center; padding: 25px 0; margin-top: 40px; font-size: 13px; }
     </style>
 </head>
 <body>
 
 <header>
     <h1>🏕️ كشتتنا - لدليل الرحلات</h1>
-    <p>توثيق ذكي وتلقائي لرحلاتك</p>
+    <p>المنصة الرسمية الموثقة لرحلاتك</p>
 </header>
 
 <div class="container">
     <div class="card">
         <div id="map"></div>
         
+        <button id="trackBtn" class="btn-track" style="margin-bottom: 15px; width: 100%;" onclick="toggleTracking()">🚀 ابدأ تتبع أثري (لعدم الضياع)</button>
+
         <div class="input-group">
             <label>📍 اسم الوجهة:</label>
-            <input type="text" id="destination" placeholder="مثلاً: فياض الصمان">
+            <input type="text" id="destination" placeholder="أدخل اسم المكان">
         </div>
 
         <div class="input-group">
             <label>🌐 الإحداثيات (GPS):</label>
-            <input type="text" id="coords" placeholder="اضغط على الخريطة لتحديد الموقع">
+            <input type="text" id="coords" readonly placeholder="اضغط على الخريطة">
         </div>
 
         <div class="input-group">
@@ -68,104 +79,70 @@
         </div>
 
         <div class="btn-stack">
-            <button class="btn-save" onclick="saveTrip()">💾 حفظ الرحلة والمسار</button>
-            <button class="btn-view" onclick="toggleSaved()">📂 عرض الرحلات المحفوظة</button>
+            <button class="btn-save" onclick="saveTrip()">💾 حفظ الرحلة</button>
+            <button class="btn-view" onclick="toggleSaved()">📂 عرض السجل</button>
             <button class="btn-reset" onclick="resetForm()">🔄 إعادة تعيين</button>
         </div>
     </div>
 
     <div id="saved-list">
-        <h3 style="text-align: right; margin-right: 10px;">📋 السجل المحفوظ:</h3>
+        <h3 style="text-align: right; padding-right:10px; color: var(--primary-green);">📋 السجل المحفوظ:</h3>
         <div id="items-container"></div>
     </div>
 </div>
 
 <footer>
     <p>© 2026 جميع الحقوق محفوظة لمنصة <b>كشتتنا</b></p>
-    <p style="font-size: 10px; opacity: 0.6; margin-top: 5px;">نظام توثيق محمي ضد النسخ والاقتباس</p>
 </footer>
 
 <script>
-    // إعداد الخريطة
-    var map = L.map('map').setView([24.7136, 46.6753], 6); 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-    var marker;
-    map.on('click', function(e) {
-        var lat = e.latlng.lat.toFixed(6);
-        var lng = e.latlng.lng.toFixed(6);
-        document.getElementById('coords').value = lat + ", " + lng;
-        if (marker) { map.removeLayer(marker); }
-        marker = L.marker([lat, lng]).addTo(map);
-    });
-
-    // دالة لتحديد تاريخ اليوم تلقائياً
-    function setCurrentDate() {
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('trip-date').value = today;
-    }
-
-    function saveTrip() {
-        const dest = document.getElementById('destination').value;
-        const coords = document.getElementById('coords').value;
-        const date = document.getElementById('trip-date').value;
-
-        if(!dest || !coords) { alert("يا بطل، حدد الموقع والاسم أولاً!"); return; }
-
-        const trip = { dest, coords, date, id: Date.now() };
-        let trips = JSON.parse(localStorage.getItem('kashtatna_v3') || '[]');
-        trips.push(trip);
-        localStorage.setItem('kashtatna_v3', JSON.stringify(trips));
-        alert("تم الحفظ بنجاح! ✅");
-        resetForm();
-        renderTrips();
-    }
-
-    function renderTrips() {
-        const container = document.getElementById('items-container');
-        const trips = JSON.parse(localStorage.getItem('kashtatna_v3') || '[]');
-        container.innerHTML = trips.length === 0 ? "<p style='text-align:center;'>لا يوجد رحلات مسجلة</p>" : "";
-        
-        trips.reverse().forEach((t) => {
-            container.innerHTML += `
-                <div class="trip-card">
-                    <span class="delete-btn" onclick="deleteTrip(${t.id})">حذف 🗑️</span>
-                    <strong style="color:var(--primary-green); font-size:18px;">${t.dest}</strong>
-                    <p style="font-size:13px; margin:5px 0;">🌐 الموقع: ${t.coords}</p>
-                    <p style="font-size:12px; color:#666;">📅 التاريخ: ${t.date}</p>
-                </div>
-            `;
+    var map, marker, pathLine, tracking = false, userPath = [], watchId = null;
+    function initMap() {
+        map = L.map('map').setView([24.7136, 46.6753], 6); 
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        pathLine = L.polyline([], {color: '#3498db', weight: 6, opacity: 0.8}).addTo(map);
+        map.on('click', function(e) {
+            if (!tracking) {
+                var lat = e.latlng.lat.toFixed(6), lng = e.latlng.lng.toFixed(6);
+                document.getElementById('coords').value = lat + ", " + lng;
+                if (marker) { map.removeLayer(marker); } marker = L.marker([lat, lng]).addTo(map);
+            }
         });
+        setTimeout(function(){ map.invalidateSize(); }, 400);
     }
-
-    function deleteTrip(id) {
-        if(confirm("هل تريد حذف هذه الرحلة؟")) {
-            let trips = JSON.parse(localStorage.getItem('kashtatna_v3') || '[]');
-            trips = trips.filter(t => t.id !== id);
-            localStorage.setItem('kashtatna_v3', JSON.stringify(trips));
-            renderTrips();
+    function toggleTracking() {
+        const btn = document.getElementById('trackBtn');
+        if (!tracking) {
+            tracking = true; btn.innerText = "🛑 أوقف التتبع"; btn.classList.add('active');
+            watchId = navigator.geolocation.watchPosition(function(position) {
+                var lat = position.coords.latitude, lng = position.coords.longitude;
+                var newPos = [lat, lng]; userPath.push(newPos); pathLine.setLatLngs(userPath);
+                document.getElementById('coords').value = lat.toFixed(6) + ", " + lng.toFixed(6);
+                if (marker) { map.removeLayer(marker); } marker = L.marker(newPos).addTo(map); map.panTo(newPos);
+            }, null, { enableHighAccuracy: true });
+        } else {
+            tracking = false; btn.innerText = "🚀 استئناف التتبع"; btn.classList.remove('active');
+            if (watchId) navigator.geolocation.clearWatch(watchId);
         }
     }
-
-    function toggleSaved() {
-        const list = document.getElementById('saved-list');
-        list.style.display = list.style.display === 'none' ? 'block' : 'none';
-        renderTrips();
+    function setCurrentDate() { document.getElementById('trip-date').value = new Date().toISOString().split('T')[0]; }
+    function saveTrip() {
+        const dest = document.getElementById('destination').value, coords = document.getElementById('coords').value, date = document.getElementById('trip-date').value;
+        if(!dest || !coords) { alert("عبّ البيانات أولاً!"); return; }
+        const trip = { dest, coords, date, id: Date.now() };
+        let trips = JSON.parse(localStorage.getItem('kashtatna_vFinal01') || '[]'); trips.push(trip);
+        localStorage.setItem('kashtatna_vFinal01', JSON.stringify(trips)); alert("تم الحفظ بنجاح! ✅"); resetForm();
     }
-
-    function resetForm() {
-        document.getElementById('destination').value = "";
-        document.getElementById('coords').value = "";
-        setCurrentDate(); // يرجع التاريخ لليوم الحالي
-        if (marker) { map.removeLayer(marker); }
+    function renderTrips() {
+        const container = document.getElementById('items-container');
+        const trips = JSON.parse(localStorage.getItem('kashtatna_vFinal01') || '[]');
+        container.innerHTML = trips.length === 0 ? "<p style='text-align:center;'>لا توجد رحلات</p>" : "";
+        trips.reverse().forEach((t) => { container.innerHTML += `<div class="trip-card"><span class="delete-btn" onclick="deleteTrip(${t.id})">حذف 🗑️</span><strong>${t.dest}</strong><p>📍 ${t.coords}</p><p>📅 ${t.date}</p></div>`; });
     }
-
-    // تشغيل الدوال عند فتح الصفحة
-    window.onload = function() {
-        setCurrentDate();
-        renderTrips();
-    };
+    function deleteTrip(id) { let trips = JSON.parse(localStorage.getItem('kashtatna_vFinal01') || '[]'); trips = trips.filter(t => t.id !== id); localStorage.setItem('kashtatna_vFinal01', JSON.stringify(trips)); renderTrips(); }
+    function toggleSaved() { const list = document.getElementById('saved-list'); list.style.display = list.style.display === 'none' ? 'block' : 'none'; renderTrips(); }
+    function resetForm() { document.getElementById('destination').value = ""; document.getElementById('coords').value = ""; setCurrentDate(); userPath = []; pathLine.setLatLngs([]); if (marker) map.removeLayer(marker); }
+    window.onload = function() { initMap(); setCurrentDate(); };
 </script>
-
 </body>
 </html>
