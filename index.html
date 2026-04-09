@@ -7,118 +7,133 @@
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="كشتتنا">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/854/854850.png">
-    
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --sand: #f4a460; --dark-green: #2d5a27; --wood: #8b4513; }
-        body { font-family: 'Cairo', sans-serif; background-color: #fdf5e6; color: #333; margin: 0; padding: 20px; -webkit-tap-highlight-color: transparent; }
+        :root { --primary: #2d5a27; --secondary: #f4a460; --accent: #8b4513; --bg: #f4f7f6; }
         
-        header { text-align: center; background: var(--dark-green); color: white; padding: 25px 10px; border-radius: 20px; border-bottom: 5px solid var(--wood); margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        body { font-family: 'Cairo', sans-serif; background-color: var(--bg); color: #333; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; }
         
-        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
+        /* حماية بسيطة: منع تحديد النص */
+        .no-select { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+
+        header { width: 100%; background: var(--primary); color: white; padding: 30px 0; text-align: center; border-bottom: 6px solid var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        header h1 { margin: 0; font-size: 28px; font-weight: 900; }
+
+        .container { width: 90%; max-width: 500px; margin: 20px 0; }
+        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         
-        label { display: block; margin-top: 15px; font-weight: bold; color: var(--wood); font-size: 14px; }
-        input, select { width: 100%; padding: 12px; margin-top: 8px; border: 2px solid #eee; border-radius: 12px; box-sizing: border-box; font-family: 'Cairo'; outline: none; transition: 0.3s; }
-        input:focus { border-color: var(--sand); }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 8px; font-weight: 700; color: var(--accent); }
+        input { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 12px; box-sizing: border-box; font-family: 'Cairo'; outline: none; }
         
-        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 25px; }
-        button { padding: 14px; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; transition: 0.3s; font-size: 15px; }
+        .btn-stack { display: flex; flex-direction: column; gap: 12px; margin-top: 25px; }
+        button { padding: 15px; border: none; border-radius: 12px; cursor: pointer; font-weight: 900; font-family: 'Cairo'; font-size: 16px; transition: 0.3s; width: 100%; }
         
-        .btn-save { background: var(--dark-green); color: white; grid-column: span 2; box-shadow: 0 4px 0 #1e3d1a; }
-        .btn-save:active { transform: translateY(3px); box-shadow: none; }
+        .btn-save { background: var(--primary); color: white; box-shadow: 0 4px 0 #1e3d1a; }
+        .btn-view { background: var(--secondary); color: white; }
+        .btn-reset { background: #e74c3c; color: white; font-size: 14px; }
         
-        .btn-view { background: var(--sand); color: white; }
-        .btn-reset { background: #e74c3c; color: white; }
+        #saved-list { margin-top: 25px; display: none; width: 100%; }
+        .trip-card { background: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; border-right: 6px solid var(--secondary); position: relative; }
         
-        #saved-list { margin-top: 20px; background: #fff; border-radius: 15px; padding: 15px; display: none; border: 1px solid #eee; animation: slideDown 0.4s ease; }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .trip-item { background: #fcfcfc; padding: 15px; border-bottom: 2px solid #f5f5f5; margin-bottom: 10px; border-radius: 10px; position: relative; }
-        .delete-trip { position: absolute; left: 10px; top: 10px; color: #e74c3c; cursor: pointer; font-size: 12px; }
+        /* شريط الحقوق السفلي */
+        .copyright-bar { 
+            width: 100%; 
+            background: #222; 
+            color: #888; 
+            text-align: center; 
+            padding: 15px 0; 
+            font-size: 13px; 
+            margin-top: auto;
+            border-top: 2px solid var(--secondary);
+        }
+        .copyright-bar b { color: var(--secondary); }
     </style>
 </head>
-<body>
+<body class="no-select">
 
 <header>
-    <h1 style="margin:0; font-size: 24px;">🏕️ كشتتنا - لدليل الرحلات</h1>
-    <p style="margin: 5px 0 0; font-size: 14px; opacity: 0.9;">مرحباً بك يا سلومي في تطبيقك الخاص</p>
+    <h1>🏕️ كشتتنا - لدليل الرحلات</h1>
+    <p>المنصة الرسمية الموثقة لرحلاتك</p>
 </header>
 
-<div class="card">
-    <label>📍 اسم الوجهة:</label>
-    <input type="text" id="destination" placeholder="مثلاً: فياض الصمان">
+<div class="container">
+    <div class="card">
+        <div class="input-group">
+            <label>📍 اسم الوجهة:</label>
+            <input type="text" id="destination" placeholder="مثلاً: جبال طويق">
+        </div>
+        <div class="input-group">
+            <label>🌐 الإحداثيات (GPS):</label>
+            <input type="text" id="coords" placeholder="أدخل الإحداثيات هنا">
+        </div>
+        <div class="input-group">
+            <label>📅 التاريخ:</label>
+            <input type="date" id="trip-date">
+        </div>
 
-    <label>🌐 الإحداثيات (يمكنك نسخها من ماب):</label>
-    <input type="text" id="coords" placeholder="24.7136, 46.6753">
-
-    <label>📅 تاريخ الرحلة:</label>
-    <input type="date" id="trip-date">
-
-    <label>🚗 السيارة المستخدمة:</label>
-    <select id="car-type">
-        <option>لاندكروزر 2025</option>
-        <option>سييرا</option>
-        <option>مازدا CX-9</option>
-        <option>باترول</option>
-    </select>
-
-    <div class="btn-group">
-        <button class="btn-save" onclick="saveTrip()">حفظ الرحلة الآن 💾</button>
-        <button class="btn-view" onclick="toggleSaved()">عرض رحلاتي 📂</button>
-        <button class="btn-reset" onclick="resetForm()">تصفير الخانات 🔄</button>
+        <div class="btn-stack">
+            <button class="btn-save" onclick="saveTrip()">💾 حفظ الرحلة</button>
+            <button class="btn-view" onclick="toggleSaved()">📂 عرض السجل</button>
+            <button class="btn-reset" onclick="resetForm()">🔄 إعادة تعيين</button>
+        </div>
     </div>
 
     <div id="saved-list">
-        <h4 style="margin-top:0; color: var(--dark-green);">📋 رحلاتك السابقة:</h4>
+        <h3 style="margin-right: 10px;">📋 الرحلات الموثقة:</h3>
         <div id="items-container"></div>
     </div>
 </div>
 
+<footer class="copyright-bar">
+    <p>© 2026 جميع الحقوق محفوظة لمنصة <b>كشتتنا</b></p>
+    <p style="font-size: 10px; opacity: 0.6;">يمنع الاقتباس أو نسخ المحتوى البرمجي دون إذن رسمي</p>
+</footer>
+
 <script>
+    // حماية إضافية: منع الضغطة اليمين
+    document.addEventListener('contextmenu', event => event.preventDefault());
+
     function saveTrip() {
         const dest = document.getElementById('destination').value;
         const coords = document.getElementById('coords').value;
         const date = document.getElementById('trip-date').value;
-        const car = document.getElementById('car-type').value;
 
         if(!dest || !coords) {
-            alert("سلومي، لا تنسَ تعبئة الوجهة والإحداثيات!");
+            alert("يرجى ملء البيانات المطلوبة.");
             return;
         }
 
-        const trip = { dest, coords, date, car, id: Date.now() };
-        let trips = JSON.parse(localStorage.getItem('kashtatna_trips') || '[]');
+        const trip = { dest, coords, date, id: Date.now() };
+        let trips = JSON.parse(localStorage.getItem('kashtatna_v1') || '[]');
         trips.push(trip);
-        localStorage.setItem('kashtatna_trips', JSON.stringify(trips));
-
-        alert("تمت الإضافة لدليل الرحلات! 🏕️");
+        localStorage.setItem('kashtatna_v1', JSON.stringify(trips));
+        alert("تم الحفظ وتوثيق الحقوق! ✅");
         resetForm();
         renderTrips();
     }
 
     function renderTrips() {
         const container = document.getElementById('items-container');
-        const trips = JSON.parse(localStorage.getItem('kashtatna_trips') || '[]');
-        container.innerHTML = trips.length === 0 ? "<p style='font-size:13px; color:#999;'>لا يوجد رحلات حالياً.</p>" : "";
-        
-        trips.forEach((t) => {
+        const trips = JSON.parse(localStorage.getItem('kashtatna_v1') || '[]');
+        container.innerHTML = trips.length === 0 ? "<p style='text-align:center; color:#999;'>السجل فارغ</p>" : "";
+        trips.reverse().forEach((t) => {
             container.innerHTML += `
-                <div class="trip-item">
-                    <span class="delete-trip" onclick="deleteTrip(${t.id})">حذف 🗑️</span>
-                    <strong style="color:var(--wood)">${t.dest}</strong><br>
-                    <span style="font-size:12px">📍 ${t.coords}</span><br>
-                    <span style="font-size:11px; color:#666;">📅 ${t.date || 'غير محدد'} | 🚗 ${t.car}</span>
+                <div class="trip-card">
+                    <span style="float:left; color:red; cursor:pointer;" onclick="deleteTrip(${t.id})">حذف 🗑️</span>
+                    <strong>${t.dest}</strong>
+                    <p>🌐 الموقع: ${t.coords}</p>
+                    <p>📅 التاريخ: ${t.date || '---'}</p>
                 </div>
             `;
         });
     }
 
     function deleteTrip(id) {
-        let trips = JSON.parse(localStorage.getItem('kashtatna_trips') || '[]');
+        let trips = JSON.parse(localStorage.getItem('kashtatna_v1') || '[]');
         trips = trips.filter(t => t.id !== id);
-        localStorage.setItem('kashtatna_trips', JSON.stringify(trips));
+        localStorage.setItem('kashtatna_v1', JSON.stringify(trips));
         renderTrips();
     }
 
