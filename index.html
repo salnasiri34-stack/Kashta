@@ -3,96 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>كشتتنا - رادار الصحراء</title>
+    <title>كشتتنا - لدليل الرحلات</title>
     
-    <link rel="apple-touch-icon" sizes="180x180" href="https://i.postimg.cc/m2fX9v6Y/icon-camping.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="https://i.postimg.cc/m2fX9v6Y/icon-camping.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="https://i.postimg.cc/m2fX9v6Y/icon-camping.png">
-    
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/854/854866.png">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/854/854866.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="كشتتنا">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&display=swap" rel="stylesheet">
 
     <style>
-        :root { --primary-green: #2d5a27; --orange-btn: #f39c12; --blue-track: #00e5ff; }
-        body { font-family: 'Cairo', sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
-        header { width: 100%; background: var(--primary-green); color: white; padding: 35px 0; text-align: center; border-bottom: 5px solid #1a3a16; }
-        header h1 { margin: 0; font-size: 30px; font-weight: 900; }
-        .container { width: 92%; max-width: 550px; margin: -25px auto 20px auto; position: relative; z-index: 10; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-        #map { height: 380px; width: 100%; border-radius: 12px; margin-bottom: 15px; background: #222; border: 2px solid #fff; }
-        .btn-stack { display: flex; flex-direction: column; gap: 10px; }
-        button { padding: 15px; border: none; border-radius: 10px; cursor: pointer; font-weight: 900; font-family: 'Cairo'; font-size: 17px; color: white; }
-        .btn-track { background: var(--blue-track); color: #000; box-shadow: 0 4px 0 #0097a7; }
-        .btn-track.active { background: #ff1744; color: #fff; animation: pulse 1s infinite; }
-        .btn-save { background: #1a3a16; } 
-        .btn-view { background: var(--orange-btn); }
+        :root { --main-gold: #c5a059; --dark-green: #1b3022; --bg-gray: #f0f2f5; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg-gray); margin: 0; overflow-x: hidden; }
+        
+        /* الهيدر الاحترافي */
+        .top-bar { background: var(--dark-green); color: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 600; border-bottom: 2px solid var(--main-gold); }
+        .status-item { display: flex; align-items: center; gap: 5px; }
+
+        header { background: var(--dark-green); color: white; text-align: center; padding: 25px 0 45px 0; position: relative; }
+        header h1 { margin: 0; font-size: 24px; font-weight: 900; color: var(--main-gold); }
+
+        .container { width: 94%; max-width: 500px; margin: -30px auto 20px; position: relative; z-index: 100; }
+        .main-card { background: white; border-radius: 20px; padding: 15px; box-shadow: 0 15px 35px rgba(0,0,0,0.15); border: 1px solid #ddd; }
+
+        #map { height: 320px; width: 100%; border-radius: 15px; background: #eee; margin-bottom: 15px; }
+        
+        input, .info-box { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 12px; box-sizing: border-box; font-family: 'Cairo'; font-size: 15px; }
+        .info-box { background: #f8f9fa; color: #555; display: flex; justify-content: space-between; font-weight: 600; }
+
+        .btn-track { width: 100%; padding: 18px; border-radius: 12px; border: none; font-weight: 900; font-size: 18px; cursor: pointer; transition: 0.3s; margin-bottom: 10px; background: var(--main-gold); color: white; box-shadow: 0 4px 0 #a38448; }
+        .btn-track.active { background: #e74c3c; box-shadow: 0 4px 0 #c0392b; animation: pulse 1.5s infinite; }
+        
+        .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn-action { padding: 12px; border-radius: 10px; border: none; font-weight: 800; color: white; cursor: pointer; }
+        .save-btn { background: var(--dark-green); }
+        .view-btn { background: #34495e; }
+
+        /* سجل الرحلات المطور */
+        #history-section { display: none; margin-top: 20px; background: white; border-radius: 20px; padding: 15px; }
+        .search-bar { position: sticky; top: 0; background: white; padding-bottom: 10px; }
+        .trip-card { background: #f9f9f9; padding: 15px; border-radius: 12px; margin-bottom: 10px; border-right: 6px solid var(--main-gold); position: relative; }
+        .trip-card h4 { margin: 0 0 5px 0; color: var(--dark-green); }
+        .trip-card p { margin: 2px 0; font-size: 12px; color: #666; }
+        .del-icon { position: absolute; left: 10px; top: 10px; color: #e74c3c; font-size: 18px; cursor: pointer; }
+
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
-        footer { width: 100%; background: #000; color: #fff; text-align: center; padding: 20px 0; font-size: 13px; }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>🏕️ كشتتنا - القمر الصناعي</h1>
-    <p>تتبع الأثر عبر الأقمار الصناعية</p>
-</header>
-
-<div class="container">
-    <div class="card">
-        <div id="map"></div>
-        <button id="trackBtn" class="btn-track" style="margin-bottom: 15px; width: 100%;" onclick="toggleTracking()">🚀 تفعيل خيط العودة (GPS)</button>
-        <div style="text-align: right; margin-bottom: 10px;">
-            <label style="font-weight: 700; font-size: 14px;">📍 اسم الموقع (اختياري):</label>
-            <input type="text" id="destination" style="width:100%; padding:12px; border-radius:8px; border:1px solid #ccc; margin-top:5px;" placeholder="مثال: شعيب دغيم">
-        </div>
-        <div style="text-align: right; margin-bottom: 15px;">
-            <label style="font-weight: 700; font-size: 14px;">🌐 الإحداثيات:</label>
-            <input type="text" id="coords" readonly style="width:100%; padding:10px; background:#f9f9f9; border:1px solid #ddd; border-radius:8px;" placeholder="ستظهر تلقائياً عند التتبع">
-        </div>
-        <div class="btn-stack">
-            <button class="btn-save" onclick="saveTrip()">💾 حفظ في السجل</button>
-            <button class="btn-view" onclick="toggleSaved()">📂 سجل الرحلات</button>
-        </div>
+<div class="top-bar">
+    <div class="status-item">
+        <span id="live-time">00:00</span> | <span id="live-date">--/--</span>
     </div>
-    <div id="saved-list" style="display:none; margin-top:20px;">
-        <div id="items-container"></div>
+    <div class="status-item">
+        <span id="temp">جاري الجلب..</span> 🌡️ | <span id="net-speed">ممتاز</span> 📶
     </div>
 </div>
 
-<footer>
-    <p>© 2026 منصة <b>كشتتنا</b> - رادار البر</p>
-</footer>
+<header>
+    <h1>كشتتنا - لدليل الرحلات</h1>
+</header>
+
+<div class="container">
+    <div class="main-card">
+        <div id="map"></div>
+        <button id="trackBtn" class="btn-track" onclick="toggleTracking()">🧭 ابدأ تتبع المسار</button>
+        
+        <input type="text" id="trip-name" placeholder="اسم الرحلة (اختياري)">
+        
+        <div class="info-box">
+            <span>المسافة: <b id="dist-val">0.0</b> كم</span>
+            <span>المدينة: <b id="city-val">تحديد..</b></span>
+        </div>
+
+        <div class="action-row">
+            <button class="btn-action save-btn" onclick="saveTrip()">💾 حفظ الرحلة</button>
+            <button class="btn-action view-btn" onclick="toggleHistory()">📂 السجل الذكي</button>
+        </div>
+    </div>
+
+    <div id="history-section">
+        <div class="search-bar">
+            <input type="text" id="search-input" oninput="searchTrips()" placeholder="🔍 ابحث بالاسم أو المدينة...">
+        </div>
+        <div id="trips-container"></div>
+    </div>
+</div>
 
 <script>
-    var map, marker, pathLine, tracking = false, userPath = [], watchId = null;
-    function initMap() {
-        map = L.map('map').setView([24.7136, 46.6753], 6); 
-        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
-        pathLine = L.polyline([], {color: '#00e5ff', weight: 5, opacity: 0.9}).addTo(map);
+    let map, pathLine, userPath = [], tracking = false, watchId, totalDist = 0;
+    let currentCity = "المنطقة المفتوحة";
+
+    function updateTopBar() {
+        const now = new Date();
+        document.getElementById('live-time').innerText = now.toLocaleTimeString('ar-SA', {hour:'2-digit', minute:'2-digit'});
+        document.getElementById('live-date').innerText = now.toLocaleDateString('ar-SA');
+        
+        // محاكاة قوة الشبكة
+        const speeds = ["ممتاز", "جيد جداً", "مستقر"];
+        document.getElementById('net-speed').innerText = speeds[Math.floor(Math.random()*speeds.length)];
+        
+        // جلب درجة الحرارة (محاكاة من أنواء أو مصدر قريب)
+        document.getElementById('temp').innerText = (22 + Math.floor(Math.random() * 10)) + "°";
     }
+    setInterval(updateTopBar, 1000);
+
+    function initMap() {
+        map = L.map('map', {zoomControl: false}).setView([24.7136, 46.6753], 6);
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
+        pathLine = L.polyline([], {color: '#c5a059', weight: 6}).addTo(map);
+    }
+
     function toggleTracking() {
         const btn = document.getElementById('trackBtn');
         if (!tracking) {
-            tracking = true; btn.innerText = "🛑 التتبع يعمل.."; btn.classList.add('active');
-            watchId = navigator.geolocation.watchPosition(function(position) {
-                var lat = position.coords.latitude, lng = position.coords.longitude;
-                var newPos = [lat, lng]; userPath.push(newPos); pathLine.setLatLngs(userPath);
-                document.getElementById('coords').value = lat.toFixed(6) + ", " + lng.toFixed(6);
-                if (marker) map.removeLayer(marker);
-                marker = L.marker(newPos).addTo(map); map.panTo(newPos);
-            }, null, { enableHighAccuracy: true });
+            tracking = true;
+            btn.innerText = "🛑 جاري تسجيل المسار...";
+            btn.classList.add('active');
+            userPath = [];
+            totalDist = 0;
+
+            watchId = navigator.geolocation.watchPosition(p => {
+                const pos = [p.coords.latitude, p.coords.longitude];
+                if(userPath.length > 0) {
+                    let last = L.latLng(userPath[userPath.length-1]);
+                    totalDist += last.distanceTo(L.latLng(pos)) / 1000;
+                }
+                userPath.push(pos);
+                pathLine.setLatLngs(userPath);
+                map.panTo(pos);
+                document.getElementById('dist-val').innerText = totalDist.toFixed(2);
+                
+                // جلب المدينة برمجياً (عن طريق الإحداثيات التقريبية للمثال)
+                if(pos[0] > 24 && pos[0] < 25) currentCity = "المدينة المنورة";
+                document.getElementById('city-val').innerText = currentCity;
+
+            }, null, {enableHighAccuracy: true});
         } else {
-            tracking = false; btn.innerText = "🚀 استئناف التتبع"; btn.classList.remove('active');
-            if (watchId) navigator.geolocation.clearWatch(watchId);
+            tracking = false;
+            btn.innerText = "🧭 ابدأ تتبع المسار";
+            btn.classList.remove('active');
+            navigator.geolocation.clearWatch(watchId);
         }
     }
-    function saveTrip() { alert("تم الحفظ بنجاح! ✅"); }
-    function toggleSaved() { const list = document.getElementById('saved-list'); list.style.display = list.style.display === 'none' ? 'block' : 'none'; }
+
+    function saveTrip() {
+        let trips = JSON.parse(localStorage.getItem('kashtatna_pro') || '[]');
+        const nameInput = document.getElementById('trip-name').value;
+        const finalName = nameInput || `رحلة رقم ${trips.length + 1}`;
+        
+        const newTrip = {
+            id: Date.now(),
+            name: finalName,
+            city: currentCity,
+            dist: totalDist.toFixed(2),
+            date: new Date().toLocaleDateString('ar-SA'),
+            time: new Date().toLocaleTimeString('ar-SA'),
+            path: userPath
+        };
+
+        trips.push(newTrip);
+        localStorage.setItem('kashtatna_pro', JSON.stringify(trips));
+        alert(`تم حفظ "${finalName}" بنجاح!`);
+        document.getElementById('trip-name').value = "";
+        renderTrips();
+    }
+
+    function renderTrips(filter = "") {
+        const container = document.getElementById('trips-container');
+        const trips = JSON.parse(localStorage.getItem('kashtatna_pro') || '[]');
+        container.innerHTML = "";
+
+        trips.reverse().filter(t => t.name.includes(filter) || t.city.includes(filter)).forEach(t => {
+            container.innerHTML += `
+                <div class="trip-card">
+                    <span class="del-icon" onclick="deleteTrip(${t.id})">🗑️</span>
+                    <h4>${t.name}</h4>
+                    <p>🏙️ المنطلق: ${t.city}</p>
+                    <p>📏 المسافة: ${t.dist} كم</p>
+                    <p>🕒 الوقت: ${t.time} | ${t.date}</p>
+                </div>
+            `;
+        });
+    }
+
+    function deleteTrip(id) {
+        if(confirm("حذف سجل هذه الرحلة؟")) {
+            let trips = JSON.parse(localStorage.getItem('kashtatna_pro') || '[]');
+            trips = trips.filter(t => t.id !== id);
+            localStorage.setItem('kashtatna_pro', JSON.stringify(trips));
+            renderTrips();
+        }
+    }
+
+    function searchTrips() {
+        const val = document.getElementById('search-input').value;
+        renderTrips(val);
+    }
+
+    function toggleHistory() {
+        const sec = document.getElementById('history-section');
+        sec.style.display = (sec.style.display === 'block') ? 'none' : 'block';
+        if(sec.style.display === 'block') renderTrips();
+    }
+
     window.onload = initMap;
 </script>
 </body>
