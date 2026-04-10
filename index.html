@@ -3,135 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>كشتتنا - لدليل الرحلات</title>
+    <title>كشتتنا - نسخة سلومي الاحترافية</title>
     
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/854/854866.png">
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/854/854866.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 
     <style>
-        :root { --gold: #c5a059; --green: #1b3022; --red: #ff0000; --blue: #2980b9; }
-        body { font-family: 'Cairo', sans-serif; background: #f0f2f5; margin: 0; }
+        :root { --gold: #c5a059; --green: #1b3022; --blue: #2980b9; }
+        body { font-family: 'Cairo', sans-serif; background: #f0f2f5; margin: 0; padding-bottom: 50px; }
         
-        /* الهيدر العلوي */
-        .top-bar { 
-            background: var(--green); color: white; padding: 10px; 
-            display: flex; justify-content: space-between; align-items: center; 
-            font-size: 11px; border-bottom: 2px solid var(--gold); position: sticky; top: 0; z-index: 2000; 
-        }
-        .qibla-unit { display: flex; align-items: center; gap: 5px; color: var(--gold); }
-        #qibla-arrow { transition: 0.1s; font-size: 16px; }
-
+        .top-bar { background: var(--green); color: white; padding: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; border-bottom: 2px solid var(--gold); position: sticky; top: 0; z-index: 2000; }
         header { background: var(--green); color: white; text-align: center; padding: 10px 0 30px 0; }
         header h1 { margin: 0; font-size: 20px; color: var(--gold); }
 
         .container { width: 94%; max-width: 500px; margin: -20px auto 20px; position: relative; z-index: 100; }
-        .main-card { background: white; border-radius: 20px; padding: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-
-        #map { height: 350px; width: 100%; border-radius: 15px; margin-bottom: 15px; border: 2px solid white; }
+        .main-card { background: white; border-radius: 20px; padding: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); position: relative; }
         
-        /* أزرار التحكم الرئيسية */
+        #map { height: 380px; width: 100%; border-radius: 15px; margin-bottom: 15px; border: 2px solid white; z-index: 1; }
+        
+        /* زر تحديد الموقع فوق الخريطة */
+        .locate-btn {
+            position: absolute; top: 25px; right: 25px; z-index: 1000;
+            background: white; width: 45px; height: 45px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 2px solid var(--gold);
+            cursor: pointer; font-size: 20px; transition: 0.2s;
+        }
+        .locate-btn:active { transform: scale(0.9); background: #eee; }
+
         .btn-main { width: 100%; padding: 16px; border-radius: 12px; border: none; font-weight: 900; font-size: 17px; cursor: pointer; margin-bottom: 10px; color: white; }
         .btn-track { background: var(--gold); box-shadow: 0 4px 0 #a38448; }
-        .btn-track.active { background: var(--red); box-shadow: 0 4px 0 #c0392b; }
+        .btn-track.active { background: #ff0000; box-shadow: 0 4px 0 #c0392b; }
 
         .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn-sub { padding: 12px; border-radius: 10px; border: none; color: white; font-weight: 800; cursor: pointer; font-size: 13px; }
+        .btn-sub { padding: 12px; border-radius: 10px; border: none; color: white; font-weight: 800; cursor: pointer; font-size: 13px; font-family: 'Cairo'; }
         .save-path { background: var(--green); }
         .save-place { background: var(--blue); }
         .notes-trigger { background: #555; grid-column: span 2; }
 
-        /* نوافذ الملاحظات والسجلات */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 3000; align-items: center; justify-content: center; }
-        .modal-content { background: white; width: 85%; max-width: 400px; padding: 20px; border-radius: 20px; position: relative; }
-        .close-modal { position: absolute; top: 10px; left: 10px; font-size: 20px; cursor: pointer; }
+        .modal-content { background: white; width: 85%; max-width: 400px; padding: 20px; border-radius: 20px; }
 
-        textarea { width: 100%; border-radius: 10px; padding: 10px; border: 1px solid #ddd; font-family: 'Cairo'; margin-top: 10px; box-sizing: border-box; }
-        
-        /* سجلات منفصلة تحت */
         .history-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-        .tab-btn { background: white; padding: 15px; border-radius: 15px; border: 1px solid #ddd; text-align: center; font-weight: 800; color: #333; }
+        .tab-btn { background: white; padding: 15px; border-radius: 15px; border: 1px solid #ddd; text-align: center; font-weight: 800; }
         .tab-content { display: none; background: white; margin-top: 10px; padding: 15px; border-radius: 15px; border: 1px solid #ddd; }
 
-        .record-card { background: #f9f9f9; padding: 10px; border-radius: 10px; margin-bottom: 8px; border-right: 4px solid var(--gold); }
-        .user-dot { width: 16px; height: 16px; background: #4285F4; border: 2px solid white; border-radius: 50%; box-shadow: 0 0 10px #4285F4; }
+        .record-card { background: #f9f9f9; padding: 10px; border-radius: 10px; margin-bottom: 10px; border-right: 4px solid var(--gold); display: flex; justify-content: space-between; align-items: center; }
+        .view-btn { background: var(--gold); color: white; border: none; padding: 8px 15px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; font-family: 'Cairo'; }
+        
+        .user-dot { width: 18px; height: 18px; background: #4285F4; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 15px #4285F4; }
     </style>
 </head>
 <body>
 
 <div class="top-bar">
-    <div>🕒 <span id="time">00:00</span> | 🌡️ <span id="temp">25°</span></div>
-    <div class="qibla-unit"><span id="comp">N</span> | 🕋 <span id="arrow">⬆️</span></div>
-    <div>📶 <span id="net">قوي</span></div>
+    <div>🕒 <span id="time">00:00</span></div>
+    <div>🕋 القبلة: <span id="arrow">⬆️</span></div>
+    <div>🌡️ <span id="temp">25°</span></div>
 </div>
 
-<header><h1>كشتتنا - لدليل الرحلات</h1></header>
+<header><h1>كشتتنا - بوصلة سلومي</h1></header>
 
 <div class="container">
     <div class="main-card">
+        <div class="locate-btn" onclick="goToMyLocation()" title="حدد موقعي">🎯</div>
+        
         <div id="map"></div>
+        
         <button id="trackBtn" class="btn-main btn-track" onclick="toggleTracking()">🧭 ابدأ تتبع المسار</button>
         
         <div class="action-grid">
-            <button class="btn-sub notes-trigger" onclick="openNotes()">📝 إضافة ملاحظات للرحلة</button>
+            <button class="btn-sub notes-trigger" onclick="openNotes()">📝 إضافة ملاحظة</button>
             <button class="btn-sub save-path" onclick="savePath()">💾 حفظ سجل المسار</button>
-            <button class="btn-sub save-place" onclick="savePlace()">📍 حفظ المكان الحالي</button>
+            <button class="btn-sub save-place" onclick="savePlace()">📍 حفظ مكان مفضل</button>
         </div>
     </div>
 
     <div class="history-tabs">
         <div class="tab-btn" onclick="toggleTab('path-hist')">📂 سجل المسارات</div>
-        <div class="tab-btn" onclick="toggleTab('place-hist')">🌟 أماكن مفضلة</div>
+        <div class="tab-btn" onclick="toggleTab('place-hist')">🌟 الأماكن المفضلة</div>
     </div>
 
-    <div id="path-hist" class="tab-content"><h3>📋 سجل المسارات المحفوظة</h3><div id="path-list"></div></div>
-    <div id="place-hist" class="tab-content"><h3>📍 الأماكن المفضلة</h3><div id="place-list"></div></div>
+    <div id="path-hist" class="tab-content"><h3>📋 المسارات المسجلة</h3><div id="path-list"></div></div>
+    <div id="place-hist" class="tab-content"><h3>🌟 مفضلاتي</h3><div id="place-list"></div></div>
 </div>
 
 <div id="notesModal" class="modal">
     <div class="modal-content">
-        <span class="close-modal" onclick="closeNotes()">×</span>
-        <h3>📝 ملاحظات الرحلة</h3>
-        <input type="text" id="tripName" placeholder="اسم الرحلة (اختياري)" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd; box-sizing:border-box;">
-        <textarea id="tripNotes" rows="4" placeholder="اكتب ملاحظاتك هنا..."></textarea>
-        <button class="btn-main" style="background:var(--green); margin-top:10px;" onclick="closeNotes()">تم (سيتم الحفظ مع المسار)</button>
+        <h3>📝 تفاصيل الرحلة</h3>
+        <input type="text" id="tripName" placeholder="اسم الرحلة" style="width:100%; padding:12px; margin-bottom:10px; border-radius:10px; border:1px solid #ddd; box-sizing:border-box;">
+        <textarea id="tripNotes" rows="4" placeholder="اكتب ملاحظاتك هنا..." style="width:100%; border-radius:10px; padding:10px; border:1px solid #ddd; box-sizing:border-box; font-family:'Cairo';"></textarea>
+        <button class="btn-main" style="background:var(--green); margin-top:10px;" onclick="closeNotes()">حفظ الملاحظة</button>
     </div>
 </div>
 
 <script>
-    let map, pathLine, userPath = [], tracking = false, watchId, totalDist = 0, userMarker;
+    let map, pathLine, historyPathLine, userPath = [], tracking = false, watchId, userMarker, savedMarker;
 
     function initMap() {
         map = L.map('map', {zoomControl: false}).setView([24.4673, 39.6111], 12);
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
-        pathLine = L.polyline([], {color: '#ff0000', weight: 6}).addTo(map);
+        
+        pathLine = L.polyline([], {color: '#ff0000', weight: 6, opacity: 0.8}).addTo(map);
+        historyPathLine = L.polyline([], {color: '#ffff00', weight: 4, dashArray: '5, 10'}).addTo(map);
+
+        // تفعيل الجي بي اس فور التشغيل
+        goToMyLocation();
 
         if (window.DeviceOrientationEvent) {
             window.addEventListener('deviceorientation', e => {
                 if (e.alpha !== null) {
-                    let dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', 'N'];
-                    document.getElementById('comp').innerText = dirs[Math.round(e.alpha / 45) % 8];
-                    document.getElementById('arrow').style.transform = `rotate(${180 - e.alpha}deg)`;
+                    let angle = e.webkitCompassHeading || (360 - e.alpha);
+                    document.getElementById('arrow').style.transform = `rotate(${180 - angle}deg)`;
                 }
             });
         }
     }
 
+    function goToMyLocation() {
+        navigator.geolocation.getCurrentPosition(p => {
+            const pos = [p.coords.latitude, p.coords.longitude];
+            if(userMarker) map.removeLayer(userMarker);
+            userMarker = L.marker(pos, {icon: L.divIcon({className: 'user-dot'})}).addTo(map);
+            map.setView(pos, 16);
+        }, err => alert("تأكد من تفعيل الموقع (GPS)"), {enableHighAccuracy: true});
+    }
+
     function toggleTracking() {
         const btn = document.getElementById('trackBtn');
         if (!tracking) {
-            tracking = true; btn.innerText = "🛑 جاري تسجيل المسار.."; btn.classList.add('active');
+            tracking = true; btn.innerText = "🛑 جاري تسجيل الخيط.."; btn.classList.add('active');
+            userPath = []; // تصفير المسار الجديد
             watchId = navigator.geolocation.watchPosition(p => {
                 const pos = [p.coords.latitude, p.coords.longitude];
                 if(userMarker) map.removeLayer(userMarker);
                 userMarker = L.marker(pos, {icon: L.divIcon({className: 'user-dot'})}).addTo(map);
-                if(userPath.length > 0) totalDist += L.latLng(userPath[userPath.length-1]).distanceTo(L.latLng(pos)) / 1000;
-                userPath.push(pos); pathLine.setLatLngs(userPath);
+                userPath.push(pos); 
+                pathLine.setLatLngs(userPath);
                 map.panTo(pos);
             }, null, {enableHighAccuracy: true});
         } else {
@@ -140,65 +149,78 @@
         }
     }
 
-    function openNotes() { document.getElementById('notesModal').style.display = 'flex'; }
-    function closeNotes() { document.getElementById('notesModal').style.display = 'none'; }
-
     function savePath() {
-        let paths = JSON.parse(localStorage.getItem('kashta_paths') || '[]');
-        const name = document.getElementById('tripName').value || `مسار ${paths.length + 1}`;
-        const notes = document.getElementById('tripNotes').value || "بدون ملاحظات";
-        paths.push({ name, notes, dist: totalDist.toFixed(2), date: new Date().toLocaleDateString('ar-SA') });
-        localStorage.setItem('kashta_paths', JSON.stringify(paths));
-        alert("تم حفظ سجل المسار! ✅");
+        let paths = JSON.parse(localStorage.getItem('k_paths_v11') || '[]');
+        if(userPath.length === 0) { alert("لا يوجد مسار لتسجيله!"); return; }
+        paths.push({ 
+            name: document.getElementById('tripName').value || `مسار ${paths.length+1}`, 
+            notes: document.getElementById('tripNotes').value,
+            path: userPath, date: new Date().toLocaleDateString('ar-SA') 
+        });
+        localStorage.setItem('k_paths_v11', JSON.stringify(paths));
+        alert("تم حفظ المسار في السجل! ✅");
         renderPaths();
     }
 
     function savePlace() {
-        if(!userMarker && userPath.length === 0) { alert("حدد موقعك أولاً!"); return; }
-        let name = prompt("ما اسم هذا المكان؟");
-        if(!name) return;
-        let places = JSON.parse(localStorage.getItem('kashta_places') || '[]');
-        places.push({ name, date: new Date().toLocaleDateString('ar-SA') });
-        localStorage.setItem('kashta_places', JSON.stringify(places));
-        alert("تم حفظ المكان بنجاح! 🌟");
-        renderPlaces();
+        navigator.geolocation.getCurrentPosition(p => {
+            let name = prompt("ما اسم هذا المكان المفضل؟");
+            if(!name) return;
+            let places = JSON.parse(localStorage.getItem('k_places_v11') || '[]');
+            places.push({ name, lat: p.coords.latitude, lng: p.coords.longitude, date: new Date().toLocaleDateString('ar-SA') });
+            localStorage.setItem('k_places_v11', JSON.stringify(places));
+            alert("تم حفظ المكان بنجاح! 📍");
+            renderPlaces();
+        }, null, {enableHighAccuracy: true});
     }
 
-    function toggleTab(id) {
-        let el = document.getElementById(id);
-        let current = el.style.display;
-        document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-        el.style.display = current === 'block' ? 'none' : 'block';
-        if(id === 'path-hist') renderPaths(); else renderPlaces();
+    function showOnMap(lat, lng, name) {
+        if(savedMarker) map.removeLayer(savedMarker);
+        map.setView([lat, lng], 17);
+        savedMarker = L.marker([lat, lng]).addTo(map).bindPopup(name).openPopup();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showPathOnMap(pathIdx) {
+        const data = JSON.parse(localStorage.getItem('k_paths_v11') || '[]');
+        const targetPath = data[pathIdx].path;
+        historyPathLine.setLatLngs(targetPath);
+        map.fitBounds(historyPathLine.getBounds());
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function renderPaths() {
-        const container = document.getElementById('path-list');
-        const data = JSON.parse(localStorage.getItem('kashta_paths') || '[]');
-        container.innerHTML = data.reverse().map(p => `
+        const data = JSON.parse(localStorage.getItem('k_paths_v11') || '[]');
+        document.getElementById('path-list').innerHTML = data.reverse().map((p, i) => `
             <div class="record-card">
-                <strong>🛣️ ${p.name}</strong><br>
-                <small>📏 ${p.dist} كم | 📅 ${p.date}</small><br>
-                <small style="color:#666">📝 ${p.notes}</small>
+                <div><strong>${p.name}</strong><br><small>${p.date}</small></div>
+                <button class="view-btn" onclick="showPathOnMap(${data.length-1-i})">🗺️ عرض</button>
             </div>`).join('');
     }
 
     function renderPlaces() {
-        const container = document.getElementById('place-list');
-        const data = JSON.parse(localStorage.getItem('kashta_places') || '[]');
-        container.innerHTML = data.reverse().map(p => `
+        const data = JSON.parse(localStorage.getItem('k_places_v11') || '[]');
+        document.getElementById('place-list').innerHTML = data.reverse().map(p => `
             <div class="record-card" style="border-right-color:var(--blue)">
-                <strong>📍 ${p.name}</strong><br>
-                <small>📅 تاريخ الحفظ: ${p.date}</small>
+                <div><strong>📍 ${p.name}</strong><br><small>${p.date}</small></div>
+                <button class="view-btn" style="background:var(--blue)" onclick="showOnMap(${p.lat}, ${p.lng}, '${p.name}')">عرض</button>
             </div>`).join('');
     }
 
-    setInterval(() => {
-        const now = new Date();
-        document.getElementById('time').innerText = now.getHours() + ":" + (now.getMinutes()<10?'0':'') + now.getMinutes();
-        document.getElementById('temp').innerText = (24 + Math.floor(Math.random() * 5)) + "°";
-    }, 1000);
+    function toggleTab(id) {
+        document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+        document.getElementById(id).style.display = 'block';
+        if(id === 'path-hist') renderPaths(); else renderPlaces();
+    }
 
+    function openNotes() { document.getElementById('notesModal').style.display = 'flex'; }
+    function closeNotes() { document.getElementById('notesModal').style.display = 'none'; }
+    
+    setInterval(() => { 
+        document.getElementById('time').innerText = new Date().toLocaleTimeString('ar-SA', {hour:'2-digit', minute:'2-digit'}); 
+        document.getElementById('temp').innerText = (25 + Math.floor(Math.random() * 3)) + "°";
+    }, 1000);
+    
     window.onload = initMap;
 </script>
 </body>
